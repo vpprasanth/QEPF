@@ -36,6 +36,7 @@ Open `QEPF.Rproj` in RStudio, or set the working directory to this folder, then 
 | `R/05_smarter_analysis.R` | Figure 4, Section 8 test, Table 6 | `figures/fig4_smarter_curves.pdf`, `results/smarter_*.csv` | several hours |
 | `R/06_smarter_level_component.R` | Section 8: tail-mean ratio and $\Delta_{\min}$ | `results/smarter_level_component.csv` | minutes |
 | `R/07_run_time.R` | Section 6.5 (timing) | printed | seconds |
+| `R/08_asymptotic_variance_check.R` | Section 5.1 (numerical check of Proposition 5.1) | `results/asymptotic_variance_check.csv` | about 1.5–2 hours |
 | `figures/fig1.tex` | Figure 1 (closed-form $P(u)$) | `figures/fig1.pdf` | seconds |
 
 The simulation scripts have a `QUICK` switch at the end: `QUICK <- TRUE` runs a one-minute check, `QUICK <- FALSE` (the default) runs the full design used in the paper. The `results/` folder already contains the outputs used in the paper. Figures 3 and 1 are built with pgfplots: compile `fig3.tex` and `fig1.tex` from inside `figures/` with pdflatex or lualatex.
