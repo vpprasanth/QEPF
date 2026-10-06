@@ -14,19 +14,20 @@ authors:
   - given-names: "P.G."
     family-names: "Sankaran"
     affiliation: "Department of Statistics, Cochin University of Science and Technology, Kochi, India"
-  - given-names: "Prasanth"
-    family-names: "V.P."
+  - given-names: "V.P."
+    family-names: "Prasanth"
     email: "prasanth.stat@gmail.com"
     affiliation: "Department of Statistics, Cochin University of Science and Technology, Kochi, India"
     orcid: "https://orcid.org/0009-0005-8660-0035"
-  - given-names: "Midhu"
-    family-names: "N.N."
+  - given-names: "N.N."
+    family-names: "Midhu"
     affiliation: "Biostatistics, IQVIA, Kochi, India"
     orcid: "https://orcid.org/0000-0001-7570-3446"
 repository-code: "https://github.com/vpprasanth/QEPF"
 license: MIT
 version: "1.0.1"
 date-released: "2026-10-06"
+doi: "10.5281/zenodo.23185020"
 keywords:
   - quantile function
   - mean residual quantile function
