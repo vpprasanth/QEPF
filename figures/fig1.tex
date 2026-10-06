@@ -1,0 +1,134 @@
+% pdflatex -shell-escape fig_01.tex
+% =============================================================================
+\documentclass[multi,crop,landscape]{standalone}
+\standaloneconfig{border=0pt}
+
+\usepackage{amsmath} % needed for \dfrac
+\usepackage{pgfplots}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.18, lua backend=false}
+
+% ---------- Safe helper ----------
+\pgfmathdeclarefunction{clipone}{1}{%
+  \pgfmathparse{min(max(#1,0.0001),0.9999)}%
+}
+
+% ---------- P(u) functions ----------
+% Uniform(0,1): P(u) = (1+u)/(2u)
+\pgfmathdeclarefunction{Puni}{1}{%
+  \pgfmathparse{ (1 + clipone(#1)) / (2 * clipone(#1)) }%
+}
+% -------------- b > a -----
+
+% P(u) for Uniform(a,b), assuming b > a and a,b > 0
+% Usage: PuniAB(u, a, b)
+\pgfmathdeclarefunction{PuniAB}{3}{%
+  \pgfmathparse{
+    ( #2 + ( (#3 - #2) * (1 + clipone(#1)) ) / 2 ) /
+    ( #2 + ( (#3 - #2) * clipone(#1) ) )
+  }%
+}
+% -------------------------
+
+% Exponential: P(u) = 1 - 1 / ln(1-u)
+\pgfmathdeclarefunction{Pexp}{1}{%
+  \pgfmathparse{ 1 - 1 / ln(1 - clipone(#1)) }%
+}
+
+% Power: P(u) = [ beta(1 - u^{1+1/beta}) ] / [ (1-u) u^{1/beta} (beta+1) ]
+\pgfmathdeclarefunction{Ppow}{2}{%
+  \pgfmathparse{ (#2*(1 - clipone(#1)^(1 + 1/#2))) /
+                 ( (1 - clipone(#1)) * clipone(#1)^(1/#2) * (#2 + 1) ) }%
+}
+
+\begin{document}
+\begin{tikzpicture}
+  \begin{groupplot}[
+    group style={group size=2 by 2, horizontal sep=2.0cm, vertical sep=3cm},
+    width=12.5cm, height=9.5cm,
+    samples=2000,
+    grid=both, major grid style={gray!25}, minor grid style={gray!10},
+    xlabel={$u$}, ylabel={$P(u)$},
+    title style={font=\small, align=center},
+    legend style={font=\small, draw=none, fill=none},
+    every axis/.append style={thick}
+  ]
+
+  % ================= Panel 1: Uniform (fixed a=0, b=1) =================
+  \nextgroupplot[
+    title={Uniform $(a{=}0,b{=}1)$:\quad $P(u)=\dfrac{1+u}{2u}$},
+    % xmin=0.1, xmax=0.99, domain=0.1:0.99
+    xmin=0, xmax=1, ymin=0, ymax=10,
+    restrict y to domain=0:10,
+    unbounded coords=jump
+  ]
+    % \addplot[black, dashed, line width=2pt] {1};
+    % \addplot[blue, line width=2pt] { Puni(x) }; \addlegendentry{Uniform $(0,1)$ (mean $=0.5$)}
+    
+    \addplot[black, dashed, line width=2pt] {1}; \addlegendentry{reference line at 1}
+    \addplot[blue, line width=2pt] { Puni(x) }; \addlegendentry{Uniform $(0,1)$}
+    \addplot[red, line width=2pt] { PuniAB(x,1,2) }; \addlegendentry{Uniform $(1,2)$}
+    \addplot[teal!70!black, line width=2pt] { PuniAB(x,1,3) }; \addlegendentry{Uniform $(1,3)$}
+
+  % ================= Panel 2: Exponential =================
+  % Means 1,2,3 with ?? = 1, 0.5, 1/3 (P(u) does not depend on ??).
+  \nextgroupplot[
+    title={Exponential $(\lambda)$:\quad $P(u)=1-\dfrac{1}{\log(1-u)}$},
+    % xmin=0.2, xmax=0.8, domain=0.2:0.8
+    % xmin=0.1, xmax=0.99, domain=0.1:0.99
+    xmin=0, xmax=1, ymin=0, ymax=10,
+    restrict y to domain=0:10,
+    unbounded coords=jump
+  ]
+    \addplot[black, dashed, line width=2pt] {1}; \addlegendentry{reference line at 1}
+    \addplot[blue, line width=2pt] { Pexp(x) }; \addlegendentry{\ $\lambda=1$}
+    % \addplot[red, line width=2pt]  { Pexp(x) }; \addlegendentry{mean=2;\ $\lambda=0.5$}
+    % \addplot[teal!70!black, line width=2pt] { Pexp(x) }; \addlegendentry{mean=3;\ $\lambda=\frac{1}{3}$}
+
+  % ================= Panel 3: Pareto I =================
+  % ??=1. Mean = ????/(??-1) => feasible for mean>1 only.
+  \nextgroupplot[
+    title={Pareto I $(\beta{=}1,\alpha)$:\quad $P(u)=\dfrac{\alpha}{\alpha-1}$},
+    % xmin=0.1, xmax=0.99, domain=0.05:0.99
+    % xmin=0.1, xmax=0.99, domain=0.1:0.99
+    xmin=0, xmax=1, ymin=0, ymax=10,
+    restrict y to domain=0:10,
+    unbounded coords=jump
+  ]
+    \addplot[black, dashed, line width=2pt] {1}; \addlegendentry{reference:\ $P{=}1$} % <--- add legend entry
+    \addplot[blue, line width=2pt] { 2.0 / (2.0 - 1.0) }; \addlegendentry{\ $\alpha=2$}
+    \addplot[red, line width=2pt]  { 1.5 / (1.5 - 1.0) }; \addlegendentry{\ $\alpha=1.5$}
+    % (mean=1 not possible for Pareto I)
+
+  % ================= Panel 4: Power =================
+  % Mean = a??/(??+1). Fix ??=1 and set a = 2,4,6 for means 1,2,3.
+  % P(u) depends on ?? (not on a), so curves coincide for ??=1.
+  \nextgroupplot[
+    title={Power $(a,\beta)$:\quad $P(u)=\dfrac{\beta\,(1-u^{1+1/\beta})}{(1-u)\,u^{1/\beta}\,(\beta+1)}$},
+    % xmin=0.1, xmax=0.99, domain=0.1:0.99
+    xmin=0, xmax=1, ymin=0, ymax=10,
+    restrict y to domain=0:10,
+    unbounded coords=jump
+  ]
+    \addplot[black, dashed, line width=2pt] {1}; \addlegendentry{reference line at 1}
+    \addplot[blue, line width=2pt] { Ppow(x,1.0) }; \addlegendentry{$\beta=1$}
+    \addplot[red, line width=2pt]  { Ppow(x,2.0) }; \addlegendentry{$\beta=2$}
+    \addplot[teal!70!black, line width=2pt] { Ppow(x,3.0) }; \addlegendentry{$\beta=3$}
+
+  \end{groupplot}
+\end{tikzpicture}
+\end{document}
+
+% =============================================================================
+
+% --- Post-build conversion to PNG via ImageMagick ---
+% Transparent PNG (recommended for slides):
+% \AtEndDocument{%
+%   \immediate\write18{magick convert -density 300 -background none -alpha on "\fig_01.pdf" "\fig_01.png"}%
+% }
+% If you prefer opaque (white) background, use instead:
+\AtEndDocument{%
+  \immediate\write18{magick convert -density 300 "\fig_01.pdf" "\fig_01.png"}%
+}
+
+% =============================================================================

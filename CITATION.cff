@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite it using the metadata below, together with the accompanying paper."
+title: "QEPF: Quantile-Based Effectiveness Persistence Function (R code)"
+abstract: >-
+  R code accompanying the paper "Quantile-Based Effectiveness Persistence
+  Function: A Tail-Focused Metric with Theory, Estimation, and Application to
+  Biosimilar Evaluation". It provides the nonparametric estimator of the
+  quantile-based effectiveness persistence function P(u) = V(u)/Q(u), a
+  permutation test of equal persistence, an equivalence test for tail shape,
+  the tail-mean ratio, and the code for all simulation studies and the SMARTER
+  trial analysis reported in the paper.
+type: software
+authors:
+  - given-names: "P.G."
+    family-names: "Sankaran"
+    affiliation: "Department of Statistics, Cochin University of Science and Technology, Kochi, India"
+  - given-names: "Prasanth"
+    family-names: "V.P."
+    email: "prasanth.stat@gmail.com"
+    affiliation: "Department of Statistics, Cochin University of Science and Technology, Kochi, India"
+    orcid: "https://orcid.org/0009-0005-8660-0035"
+  - given-names: "Midhu"
+    family-names: "N.N."
+    affiliation: "Biostatistics, IQVIA, Kochi, India"
+    orcid: "https://orcid.org/0000-0001-7570-3446"
+repository-code: "https://github.com/vpprasanth/QEPF"
+license: MIT
+version: "1.0.0"
+date-released: "2026-10-06"
+keywords:
+  - quantile function
+  - mean residual quantile function
+  - tail persistence
+  - total time on test
+  - permutation test
+  - equivalence test
+  - biosimilarity
+  - R
