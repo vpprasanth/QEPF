@@ -33,13 +33,13 @@ Open `QEPF.Rproj` in RStudio, or set the working directory to this folder, then 
 | `R/02_sim_equality_test.R` | Tables 3–4 (size and power of the test of equal persistence) | `results/sim_equality_size.csv`, `results/sim_equality_power.csv` | several hours (parallel) |
 | `R/03_sim_equivalence_test.R` | Table 5 (equivalence test) | `results/sim_equivalence.csv` | about 15 minutes (parallel) |
 | `R/04_fig3_estimator_curves.R` + `figures/fig3.tex` | Figure 3 | `figures/qepf_*.csv`, `figures/fig3.pdf` | about a minute |
-| `R/05_smarter_analysis.R` | Figure 4, Section 8 test, Table 6 | `figures/fig4_smarter_curves.pdf`, `results/smarter_*.csv` | several hours |
+| `R/05_smarter_analysis.R` | Figure 4, Section 8 test, Table 6 | `figures/fig4_smarter_curves.pdf`, `results/smarter_sensitivity.csv` | about one hour |
 | `R/06_smarter_level_component.R` | Section 8: tail-mean ratio and $\Delta_{\min}$ | `results/smarter_level_component.csv` | minutes |
-| `R/07_run_time.R` | Section 6.5 (timing) | printed | seconds |
-| `R/08_asymptotic_variance_check.R` | Section 5.1 (numerical check of Proposition 5.1) | `results/asymptotic_variance_check.csv` | about 1.5–2 hours |
+| `R/07_run_time.R` | timing quoted in the response to the reviewers | printed | seconds |
+| `R/08_asymptotic_variance_check.R` | numerical check of the asymptotic normality result in Section 5 | `results/asymptotic_variance_check.csv` | about 1.5–2 hours |
 | `figures/fig1.tex` | Figure 1 (closed-form $P(u)$) | `figures/fig1.pdf` | seconds |
 
-The simulation scripts have a `QUICK` switch at the end: `QUICK <- TRUE` runs a one-minute check, `QUICK <- FALSE` (the default) runs the full design used in the paper. The `results/` folder already contains the outputs used in the paper. Figures 3 and 1 are built with pgfplots: compile `fig3.tex` and `fig1.tex` from inside `figures/` with pdflatex or lualatex.
+The simulation scripts have a `QUICK` switch at the end: `QUICK <- TRUE` runs a one-minute check, `QUICK <- FALSE` (the default) runs the full design used in the paper. The `results/` folder already contains the outputs used in the paper. Scripts 02 and 03 run in parallel with one random-number stream per worker, so their exact rates depend on the number of cores; on a machine with a different number of cores they agree within Monte Carlo error. All other scripts reproduce the reported values exactly. Figures 3 and 1 are built with pgfplots: compile `fig3.tex` and `fig1.tex` from inside `figures/` with pdflatex or lualatex.
 
 ## Requirements
 

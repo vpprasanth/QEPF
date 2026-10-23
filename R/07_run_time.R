@@ -1,8 +1,8 @@
 ## =====================================================================
-##  07_run_time.R  --  Section 6.5: time one permutation test of equal
-##  persistence (n = 500 per arm, B = 2000, 101 grid points on U).
-##  Reported in the paper: under one second (elapsed) on a standard laptop
-##  (0.49-0.70 s in our runs).
+##  07_run_time.R  --  time one permutation test of equal persistence
+##  (n = 500 per arm, B = 2000, 101 grid points on U).
+##  Reported in the response to the reviewers: under one second (elapsed)
+##  on a standard laptop (0.49-0.70 s in our runs).
 ##  Run from anywhere:  source("R/07_run_time.R")
 ## =====================================================================
 set.seed(1)

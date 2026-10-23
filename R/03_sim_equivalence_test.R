@@ -14,6 +14,9 @@
 ##              (found numerically), so with Delta = 0.15 the rate of
 ##              declaring equivalence is the type I error at the boundary.
 ##
+##  Exact rates depend on the number of worker processes (cores - 1); with a
+##  different number of cores they agree within Monte Carlo error.
+##
 ##  Run from the repository root:  source("R/03_sim_equivalence_test.R")
 ##  Output: results/sim_equivalence.csv     Run time: about 15 minutes
 ## =====================================================================

@@ -1,7 +1,8 @@
 ## =====================================================================
-##  08_asymptotic_variance_check.R  --  numerical check of Proposition 5.1
+##  08_asymptotic_variance_check.R  --  numerical check of the asymptotic
+##  normality of P_n(u) stated in Section 5
 ##
-##  Compares the asymptotic variance sigma^2_P(u) of Proposition 5.1 with
+##  Compares the delta-method asymptotic variance sigma^2_P(u) with
 ##  n * Var{P_n(u)} from Monte Carlo samples, for the Weibull distribution
 ##  with k = 2 (u = 0.9, 0.8) and the exponential distribution (k = 1, u = 0.9).
 ##

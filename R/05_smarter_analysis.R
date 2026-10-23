@@ -10,12 +10,12 @@
 ##           participants with a positive reduction.
 ##
 ##  Run from the repository root:  source("R/05_smarter_analysis.R")
-##  Output: figures/fig4_smarter_curves.pdf/.png, figures/smarter_*.png,
-##          results/smarter_T_perm.csv, results/smarter_T_boot.csv,
+##  Output: figures/fig4_smarter_curves.pdf/.png, figures/smarter_qepf_diff.png,
 ##          results/smarter_sensitivity.csv
-##  Run time: the baseline test (B = 20000) and the sensitivity analysis
-##  (16 intervals, B = 10000 each) take several hours; reduce B_perm,
-##  B_boot and B_sens for a quick check.
+##  The test on U = [0.60, 0.90] reported in Section 8 is the bold row of
+##  Table 6. p-values are {1 + #(T* >= T)} / (B + 1), as in Section 6.2.
+##  Run time: about one hour (16 intervals, B = 10000 each); reduce B_sens
+##  for a quick check.
 ## =====================================================================
 
 suppressPackageStartupMessages({
@@ -65,9 +65,7 @@ df0 <- dat %>%
 analysis_outcome <- "SBP"      # "SBP" or "ASCVD"
 seed    <- 2025
 L_grid  <- 30                  # grid points on U
-B_perm  <- 20000               # village-level permutations (baseline test)
-B_boot  <- 20000               # village-level pooled bootstrap (baseline test)
-B_sens  <- 10000               # per interval in the sensitivity analysis (Table 6)
+B_sens  <- 10000               # resamples per interval (Table 6 and Section 8)
 RUN_SENSITIVITY <- TRUE
 
 ## ---------------------------
@@ -94,7 +92,7 @@ cat(sprintf("Villages: Intervention = %d, Control = %d\n",
 ## ============================================================
 qepf_hat_vec_fast <- function(x, u_grid) {
   x <- sort(x); n <- length(x)
-  k_idx <- pmin(pmax(ceiling(n * u_grid), 1L), n - 1L)
+  k_idx <- pmin(pmax(as.integer(ceiling(n * u_grid - 1e-9)), 1L), n - 1L)
   cs <- c(0, cumsum(x))
   ((cs[n + 1L] - cs[k_idx + 1L]) / (n - k_idx)) / x[k_idx]
 }
@@ -139,29 +137,28 @@ permute_T_EQ_cluster <- function(df, benefit_var, U = c(0.60, 0.90), L = 201, B 
   T_perm[is.finite(T_perm)]
 }
 
-## 2) Pooled village bootstrap: resample villages from the pooled set and reassign arms
+## 2) Pooled village bootstrap: draw K villages with replacement from the pooled
+##    set; the first n_int_cl draws form the intervention arm and the rest the
+##    control arm. A village drawn more than once contributes all its
+##    participants each time it is drawn.
 bootstrap_null_T_cluster_pooled <- function(df, benefit_var, U = c(0.60, 0.90), L = 201, B = 5000, seed = 2025) {
   set.seed(seed)
   cl_tab <- df %>% distinct(village_id, arm)
   K <- nrow(cl_tab)
   n_int_cl <- sum(cl_tab$arm == "Intervention")
+  grp <- split(df[[benefit_var]], df$village_id)
   T_boot <- numeric(B)
   for (b in seq_len(B)) {
     sampled <- sample(cl_tab$village_id, size = K, replace = TRUE)
-    ref_cl <- sampled[seq_len(n_int_cl)]; bio_cl <- sampled[(n_int_cl + 1):K]
-    df_b <- df %>%
-      filter(village_id %in% sampled) %>%
-      mutate(arm_boot = case_when(village_id %in% ref_cl ~ "Intervention",
-                                  village_id %in% bio_cl ~ "Control",
-                                  TRUE ~ NA_character_)) %>%
-      filter(!is.na(arm_boot))
-    x_ref_b <- df_b %>% filter(arm_boot == "Intervention") %>% pull(benefit_var)
-    x_bio_b <- df_b %>% filter(arm_boot == "Control")      %>% pull(benefit_var)
-    if (length(x_ref_b) < 2 || length(x_bio_b) < 2) { T_boot[b] <- NA_real_; next }
+    x_ref_b <- unlist(grp[as.character(sampled[seq_len(n_int_cl)])], use.names = FALSE)
+    x_bio_b <- unlist(grp[as.character(sampled[(n_int_cl + 1):K])], use.names = FALSE)
     T_boot[b] <- qepf_diff_and_T(x_ref_b, x_bio_b, U = U, L = L)$T_EQ
   }
   T_boot[is.finite(T_boot)]
 }
+
+## p-value as in Section 6.2
+p_resample <- function(Tstar, T0) (1 + sum(Tstar >= T0)) / (length(Tstar) + 1)
 
 ## ============================================================
 ## Baseline analysis on U = [0.60, 0.90] and Figure 4
@@ -191,15 +188,7 @@ p_diff <- ggplot(df_plot, aes(x = u, y = diff)) +
   theme_bw(base_size = 11) + theme(panel.grid.minor = element_blank())
 ggsave(file.path(out_dir_fig, "smarter_qepf_diff.png"), p_diff, width = 7.5, height = 4.5, dpi = 300)
 
-T_perm <- permute_T_EQ_cluster(df, benefit_var, U = c(0.60, 0.90), L = L_grid, B = B_perm, seed = seed)
-T_boot <- bootstrap_null_T_cluster_pooled(df, benefit_var, U = c(0.60, 0.90), L = L_grid, B = B_boot, seed = seed)
-cat(sprintf("\nT = %.3f (scaling factor %.1f)\n", T_obs, base$ne))
-cat(sprintf("Village permutation: p = %.5f, crit95 = %.3f (B = %d)\n",
-            mean(T_perm >= T_obs), quantile(T_perm, 0.95), length(T_perm)))
-cat(sprintf("Village pooled bootstrap: p = %.5f, crit95 = %.3f (B = %d)\n",
-            mean(T_boot >= T_obs), quantile(T_boot, 0.95), length(T_boot)))
-readr::write_csv(data.frame(T_perm = T_perm), file.path(out_dir_tab, "smarter_T_perm.csv"))
-readr::write_csv(data.frame(T_boot = T_boot), file.path(out_dir_tab, "smarter_T_boot.csv"))
+cat(sprintf("\nT = %.3f on U = [0.60, 0.90] (scaling factor %.1f)\n", T_obs, base$ne))
 
 ## ============================================================
 ## Table 6: sensitivity to the tail interval
@@ -214,7 +203,7 @@ if (RUN_SENSITIVITY) {
     Tp <- permute_T_EQ_cluster(df, benefit_var, U = U, L = L_grid, B = B_sens, seed = seed)
     Tb <- bootstrap_null_T_cluster_pooled(df, benefit_var, U = U, L = L_grid, B = B_sens, seed = seed)
     data.frame(U_lower = U[1], U_upper = U[2], L = L_grid, T_EQ = b$T_EQ, n_eff = b$ne,
-               p_perm = mean(Tp >= b$T_EQ), p_boot = mean(Tb >= b$T_EQ),
+               p_perm = p_resample(Tp, b$T_EQ), p_boot = p_resample(Tb, b$T_EQ),
                crit95_perm = unname(quantile(Tp, 0.95)), crit95_boot = unname(quantile(Tb, 0.95)),
                width = U[2] - U[1])
   })

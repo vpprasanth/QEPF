@@ -17,7 +17,10 @@
 ##    boot_mn   : m-out-of-n pooled bootstrap (power setting of the first
 ##                submission; kept for comparison)
 ##  Scenario gamma vs 0.7*gamma has equal persistence functions but a 30%
-##  lower level (Proposition 3.3 / Remark on scale blindness).
+##  lower level (Property 1 and Remark 3.2 of the paper).
+##  Exact rates depend on the number of worker processes (cores - 1),
+##  because each worker has its own random-number stream; with a different
+##  number of cores the rates agree within Monte Carlo error.
 ## =====================================================================
 
 suppressPackageStartupMessages(library(parallel))

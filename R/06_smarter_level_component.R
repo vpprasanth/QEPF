@@ -9,7 +9,7 @@
 ##     U = [0.60, 0.90], with c from a village-level bootstrap within arms.
 ##
 ##  These are the values reported in the manuscript (r = 1.161, 95% CI
-##  1.077-1.255; Delta_min = 0.261), computed with seed 2025 and B = 2000.
+##  1.081-1.256; Delta_min = 0.263), computed with seed 2025 and B = 2000.
 ##
 ##  Run from the repository root:  source("R/06_smarter_level_component.R")
 ##  Output: results/smarter_level_component.csv     Run time: a few minutes
